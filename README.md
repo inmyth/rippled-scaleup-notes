@@ -12,12 +12,14 @@
 
 ##### Copy-pasting existing data at `/var/lib/rippled` to a new empty server and install rippled.
 
+**Starting data server**
 - Deploy AMI mbcu-ubuntu1604-r1JanData-installscript070
 - run `./rippled-setup.sh`
 - run `/opt/ripple/bin/validator-keys create_keys` to generate validator keys
 - run `/opt/ripple/bin/validator-keys create_token --keyfile /home/ubuntu/.ripple/validator-keys.json` (pay attention to user directory)
 - note each server's validator_key and validator_token, add it to `/opt/rippled/etc/rippled.cfg`
 - copy the db folder to `/var/lib/rippled/` (not needed for AMI mbcu-ubuntu16014-rippled-preinstall)
+- - one file `random.seed` 's permission had to be changed to write `chmod +r`
 - modify run parameter `/usr/lib/systemd/system/rippled.service`
 - - data server is run with param `-quorum 1` and `--load`
 - run it with `sudo systemctl enable rippled.service`
