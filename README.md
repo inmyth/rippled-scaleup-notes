@@ -16,8 +16,8 @@
 - note each server's validator_key and validator_token, add it to `/opt/rippled/etc/rippled.cfg`
 - copy the db folder to `/var/lib/rippled/` (not needed for AMI mbcu-ubuntu16014-rippled-preinstall)
 - modify run parameter `/usr/lib/systemd/system/rippled.service`
--- data server is run with param `-quorum 1` and `--load`
--- other servers are run with param `--net`
+- - data server is run with param `-quorum 1` and `--load`
+- - other servers are run with param `--net`
 
 
 #### Anthony's note
