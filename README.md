@@ -12,9 +12,12 @@
 - Deploy AMI mbcu-ubuntu1604-r1JanData-installscript070
 - run `./rippled-setup.sh`
 - run `/opt/ripple/bin/validator-keys create_keys` to generate validator keys
-- run `/opt/ripple/bin/validator-keys create_token --keyfile /home/ubuntu/.ripple/validator-keys.json` (on ubuntu)
+- run `/opt/ripple/bin/validator-keys create_token --keyfile /home/ubuntu/.ripple/validator-keys.json` (pay attention to user directory)
 - note each server's validator_key and validator_token, add it to `/opt/rippled/etc/rippled.cfg`
-- copy the db folder to `/var/lib/rippled/`
+- copy the db folder to `/var/lib/rippled/` (not needed for AMI mbcu-ubuntu16014-rippled-preinstall)
+- modify run parameter `/usr/lib/systemd/system/rippled.service`
+-- data server is run with param `-quorum 1` and `--load`
+-- other servers are run with param `--net`
 
 
 #### Anthony's note
