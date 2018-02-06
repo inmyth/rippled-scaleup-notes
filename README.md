@@ -8,7 +8,10 @@
 - [] Test it with existing account to do transaction
 
 
-#### Steps
+### Steps
+
+##### Copy-pasting existing data at `/var/lib/rippled` to a new empty server and install rippled.
+
 - Deploy AMI mbcu-ubuntu1604-r1JanData-installscript070
 - run `./rippled-setup.sh`
 - run `/opt/ripple/bin/validator-keys create_keys` to generate validator keys
@@ -17,10 +20,17 @@
 - copy the db folder to `/var/lib/rippled/` (not needed for AMI mbcu-ubuntu16014-rippled-preinstall)
 - modify run parameter `/usr/lib/systemd/system/rippled.service`
 - - data server is run with param `-quorum 1` and `--load`
-- - other servers are run with param `--net`
+- run it with `sudo systemctl enable rippled.service`
+- if it doesn't work check
+- - `sudo journalctl` to see if there's owner or group issues.
+- - `sudo systemctl status rippled` to see rippled runtime issues.
+- - on ubuntu, I made it run by deleting Group and User in rippled.service, created an empty file for log `/var/log/rippled/debug.log` then rebooted the server
+- check it with `tail -f /var/log/rippled/debug.log` to see if rippled works fine or not
+- after a while test a command like `/opt/rippled/bin/rippled server_info`
 
 
-#### Anthony's note
+
+#### Anthony's method: creating an AMI image of current EC2 instance and deploy it to a new network
 
 Replication Test(A):
 1. Create Image from servers r1-r3
