@@ -21,7 +21,7 @@
 - copy the db folder to `/var/lib/rippled/` (not needed for AMI mbcu-ubuntu16014-rippled-preinstall)
 - - one file `random.seed` 's permission had to be changed to write `chmod +r`
 - modify run parameter `/usr/lib/systemd/system/rippled.service`
-- - data server is run with param `-quorum 1` and `--load`
+- - data server is run with param `--quorum 1` and `--load`
 - run it with `sudo systemctl enable rippled.service`
 - if it doesn't work check
 - - `sudo journalctl` to see if there's owner or group issues.
@@ -29,6 +29,13 @@
 - - on ubuntu, I made it run by deleting Group and User in rippled.service, created an empty file for log `/var/log/rippled/debug.log` then rebooted the server
 - check it with `tail -f /var/log/rippled/debug.log` to see if rippled works fine or not
 - after a while test a command like `/opt/rippled/bin/rippled server_info`
+**Deploying other servers**
+- data server should finish loading first before running other servers one-by-one
+- before running service it's better to run rippled directly to see what error comes out
+- in case of "cannot access /var/lib/rippled/db" use `chown -R ubuntu /var/lib/rippled`
+- run parameter `--quorum 1` and `--net`
+
+
 
 
 
