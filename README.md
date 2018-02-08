@@ -30,12 +30,11 @@
 - - `sudo systemctl status rippled` to see rippled execution issues.
 - - `tail -f /var/log/rippled/debug.log` for rippled log
 - test a command like `/opt/rippled/bin/rippled server_info`
-- id debug.log is missing wait for some moments. if it's still missing reboot the instance
+- - there's wait time after `Watchdog: Launching child 1`. after this is done debug.log will be created
 - - if rippled is running, then executing rippled will result in
 ```
 Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/create RocksDB: IO error: lock /var/lib/rippled/db/rocksdb/LOCK: Resource temporarily unavailable'
 ```
-- - there's wait time after `Watchdog: Launching child 1`
 - - initially any command will return below. it could be ok debug.log doesn't show any error.
 ```
 {
