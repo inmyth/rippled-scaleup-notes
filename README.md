@@ -24,13 +24,13 @@
 - modify run parameter `/usr/lib/systemd/system/rippled.service`
 - - data server is run with param `--quorum 1` and `--load`
 - for ubuntu, clear `User` and `Group` from `/usr/lib/systemd/system/rippled.service`
-- enable it with `sudo systemctl enable rippled.service`
-- enable it with `sudo systemctl restart rippled.service`
+- run it with `sudo systemctl restart rippled.service`
 - logs
 - - `sudo journalctl` to see if service related issues.
 - - `sudo systemctl status rippled` to see rippled execution issues.
 - - `tail -f /var/log/rippled/debug.log` for rippled log
 - test a command like `/opt/rippled/bin/rippled server_info`
+- id debug.log is missing wait for some moments. if it's still missing reboot the instance
 - - if rippled is running, then executing rippled will result in
 ```
 Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/create RocksDB: IO error: lock /var/lib/rippled/db/rocksdb/LOCK: Resource temporarily unavailable'
@@ -56,7 +56,16 @@ Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/cr
 2018-Feb-06 06:43:02 ManifestCache:DBG Manifest: Stale;Pk: nHB1gBYNwE7JQYUybTuZwHhUiVZggfEXgVgCQqCXyQDyKAc68x7J;Seq: 1;OldSeq: 1;
 2018-Feb-06 06:43:02 ValidatorList:DBG Loading configured trusted validator list publisher keys
 ```
-
+- open files problem
+```
+2018-Feb-08 05:18:29 Application:NFO Loading ledger F0F211C05C509156205C73D245F7824995A83BB1C69EDC9953FCE61917B00566 seq:3713121
+2018-Feb-08 05:18:31 NodeObject:ERR IO error: /var/lib/rippled/db/rocksdb/088158.sst: Too many open files
+2018-Feb-08 05:18:31 NodeObject:WRN Unknown status=105
+2018-Feb-08 05:18:31 Application:FTL Data is missing for selected ledger
+2018-Feb-08 05:18:31 Application:ERR The specified ledger could not be loaded.
+2018-Feb-08 05:18:31 Application:DBG Received signal: 2
+```
+- - for ubuntu it looks like max open files is 1024 (r1 centos is 8000) https://underyx.me/2015/05/18/raising-the-maximum-number-of-file-descriptors
 
 **Deploying other servers**
 
