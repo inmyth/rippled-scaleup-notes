@@ -35,6 +35,7 @@
 ```
 Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/create RocksDB: IO error: lock /var/lib/rippled/db/rocksdb/LOCK: Resource temporarily unavailable'
 ```
+- - there's wait time after `Watchdog: Launching child 1`
 - - initially any command will return below. it could be ok debug.log doesn't show any error.
 ```
 {
