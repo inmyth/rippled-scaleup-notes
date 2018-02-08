@@ -5,10 +5,11 @@
 
 - [] Deploy AMI image from an r snapshot, load it, make it connect to other servers. See Anthony's note
 
-- [] Test it with existing account to do transaction
+- [x] Test it with existing account to do transaction
 
+- [] Use latest rippled version.
 
-### Steps
+### Steps (v.070)
 
 ##### Copy-pasting existing data at `/var/lib/rippled` to a new empty server and install rippled.
 
@@ -22,20 +23,53 @@
 - - one file `random.seed` 's permission had to be changed to write `chmod +r`
 - modify run parameter `/usr/lib/systemd/system/rippled.service`
 - - data server is run with param `--quorum 1` and `--load`
-- run it with `sudo systemctl enable rippled.service`
-- if it doesn't work check
-- - `sudo journalctl` to see if there's owner or group issues.
-- - `sudo systemctl status rippled` to see rippled runtime issues.
-- - on ubuntu, I made it run by deleting Group and User in rippled.service, created an empty file for log `/var/log/rippled/debug.log` then rebooted the server
-- check it with `tail -f /var/log/rippled/debug.log` to see if rippled works fine or not
-- after a while test a command like `/opt/rippled/bin/rippled server_info`
+- for ubuntu, clear `User` and `Group` from `/usr/lib/systemd/system/rippled.service`
+- enable it with `sudo systemctl enable rippled.service`
+- enable it with `sudo systemctl restart rippled.service`
+- logs
+- - `sudo journalctl` to see if service related issues.
+- - `sudo systemctl status rippled` to see rippled execution issues.
+- - `tail -f /var/log/rippled/debug.log` for rippled log
+- test a command like `/opt/rippled/bin/rippled server_info`
+- - if rippled is running, then executing rippled will result in
+```
+Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/create RocksDB: IO error: lock /var/lib/rippled/db/rocksdb/LOCK: Resource temporarily unavailable'
+```
+- - initially any command will return below. it could be ok debug.log doesn't show any error.
+```
+{
+   "error" : "internal",
+   "error_code" : 69,
+   "error_message" : "Internal error.",
+   "error_what" : "no response from server"
+}
+```
+- looks like Jan data will get stuck with
+`Application:NFO Loading ledger F0F211C05C509156205C73D245F7824995A83BB1C69EDC9953FCE61917B00566 seq:3713121`
+- in the old server this part only took 6 minutes
+```
+2018-Feb-06 06:38:32 Application:NFO Loading ledger F0F211C05C509156205C73D245F7824995A83BB1C69EDC9953FCE61917B00566 seq:3713121
+2018-Feb-06 06:43:02 LedgerMaster:DBG Ledger 3713121 accepted :F0F211C05C509156205C73D245F7824995A83BB1C69EDC9953FCE61917B00566
+2018-Feb-06 06:43:02 OrderBookDB:DBG Advancing from 0 to 3713121
+2018-Feb-06 06:43:02 OrderBookDB:DBG OrderBookDB::update>
+2018-Feb-06 06:43:02 ManifestCache:NFO Manifest: AcceptedNew;Pk: nHB1gBYNwE7JQYUybTuZwHhUiVZggfEXgVgCQqCXyQDyKAc68x7J;Seq: 1;
+2018-Feb-06 06:43:02 ManifestCache:DBG Manifest: Stale;Pk: nHB1gBYNwE7JQYUybTuZwHhUiVZggfEXgVgCQqCXyQDyKAc68x7J;Seq: 1;OldSeq: 1;
+2018-Feb-06 06:43:02 ValidatorList:DBG Loading configured trusted validator list publisher keys
+```
+
+
 **Deploying other servers**
-- data server should finish loading first before running other servers one-by-one
+
 - before running service it's better to run rippled directly to see what error comes out
 - in case of "cannot access /var/lib/rippled/db" use `chown -R ubuntu /var/lib/rippled`
 - run parameter `--quorum 1` and `--net`
-
-
+- it takes around 5 minutes for the log to move from
+```
+Server:NFO Opened 'port_ws_public' (ip=127.0.0.1:5005, ws)
+2018-Feb-08 04:00:02 NetworkOPs:WRN We are not running on the consensus ledger
+```
+- at this point it running `rippled peers` will show the other non-data servers
+- restarting a server will cause `Peer:WRN [006] onReadMessage: short read` on the other servers' log
 
 
 
