@@ -69,6 +69,7 @@ Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/cr
 
 **Joel Katz guide**
 - https://forum.ripple.com/viewtopic.php?f=2&t=16207
+
 If you're going to make three validators with a quorum of 2, run the validation_create command three times. Take the three public keys and use that as the UNL on each server. Take the three private keys and configure one of them on each validator.
 
 You then have the challenge of coldstarting your blockchain. The easiest way to do that is to start one validator with "--quorum 1". Let it stabilize, and then add the other two validators also with "--quorum 1". Once all validators are stable, restart them one at a time without any "--quorum" command to return to the configured quorum of 2.
@@ -76,6 +77,7 @@ You then have the challenge of coldstarting your blockchain. The easiest way to 
 Note that a 2 of 3 configuration does give you fault tolerance but it does not protect you against even a single malicious/broken validator.
 
 -https://forum.ripple.com/viewtopic.php?f=2&t=15608
+
 The "validation_public_key" is what all servers should add to their list of validators. The "validation_seed" is what you should add to one server's configuration.
 
 The selection of a validation quorum is a bit complex. For large numbers of validators (greater than 15 or so), 80% of the UNL size works well. For smaller numbers, you have to make tradeoffs between fault tolerance and attack resistance. For example, with three validators, two validators give you good fault tolerance but almost no resistance to a malicious validator. Three validators gives you no fault tolerance, but resistance to a malicious validator.
