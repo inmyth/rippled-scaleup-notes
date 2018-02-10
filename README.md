@@ -116,7 +116,8 @@ The selection of a validation quorum is a bit complex. For large numbers of vali
 
 #### Errors
 - Loading 0.70 data into 0.80 and later version:
-- in server_info complete ledgers only shows one ledger
+
+in server_info complete ledgers only shows one ledger
 ```
 "amendment_blocked" : true,
 "build_version" : "0.81.0",
