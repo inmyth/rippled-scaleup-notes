@@ -107,7 +107,7 @@ You then have the challenge of coldstarting your blockchain. The easiest way to 
 
 Note that a 2 of 3 configuration does give you fault tolerance but it does not protect you against even a single malicious/broken validator.
 
--https://forum.ripple.com/viewtopic.php?f=2&t=15608
+- https://forum.ripple.com/viewtopic.php?f=2&t=15608
 
 The "validation_public_key" is what all servers should add to their list of validators. The "validation_seed" is what you should add to one server's configuration.
 
