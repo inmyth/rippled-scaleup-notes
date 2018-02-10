@@ -1,50 +1,48 @@
 ## Objectives
 
-###  Migrate data to another network
-- [] Copy the data to new server install latest rippled, load it, make it connect to other servers.
+Current private network needs scaling up. Plan a larger rippled network and figure out a way to migrate data from current r servers. New network should continue current ledgers.
 
-- [] Deploy AMI image from an r snapshot, load it, make it connect to other servers. See Anthony's note
+- [] Copy the data to new server, install rippled, load the data, make the server connect to other servers (validators, stocks).
 
-- [x] Test it with existing account to do transaction
+- ~~[x] Use latest rippled version.~~
 
-- [] Use latest rippled version.
+### Tests
+- [x] Test it with any private account to send a payment
+- [] Test balance
+- [] Get account history / account_tx
+- [] Do offerCreate
+- [] Test load. Probably need to run bots
 
-### Steps (v.070)
+### First things First
+- ripple 0.70 data is not compatible with 0.80
 
-##### Copy-pasting existing data at `/var/lib/rippled` to a new empty server and install rippled.
+#### Copy-pasting existing data at `/var/lib/rippled` to a new empty server and install rippled.
 
-**Starting data server**
-- Deploy AMI mbcu-ubuntu1604-r1JanData-installscript070
-- run `./rippled-setup.sh`
-- run `/opt/ripple/bin/validator-keys create_keys` to generate validator keys
-- run `/opt/ripple/bin/validator-keys create_token --keyfile /home/ubuntu/.ripple/validator-keys.json` (pay attention to user directory)
-- note each server's validator_key and validator_token, add it to `/opt/rippled/etc/rippled.cfg`
-- copy the db folder to `/var/lib/rippled/` (not needed for AMI mbcu-ubuntu16014-rippled-preinstall)
-- - one file `random.seed` 's permission had to be changed to write `chmod +r`
+##### Starting data server
+- Deploy AMI mbcu-ubuntu16014-rippled-preinstall. This image is plain Ubuntu 16.04 with entire data from Mr.Exchange (2018 Jan).   
+If not then data has to be copied manually. Path is `/var/lib/rippled`.
+One file in the folder `random.seed` needs its permission changed to read first. Use `chmod +r`
+- in each validator server
+- - run `./rippled-setup.sh` to install rippled.
+- - run `/opt/ripple/bin/validator-keys create_keys` to generate validator keys
+- - run `/opt/ripple/bin/validator-keys create_token --keyfile /home/ubuntu/.ripple/validator-keys.json` (pay attention to user directory).
+- edit `/opt/rippled/etc/rippled.cfg`
+- - all validator server ips are pasted under [ips_fixed] (def port 51235)
+- - all validator public keys are pasted under [validator]
+- - the two values above are the same for all rippled.cfg
+- - for each validator, change `[validation_public_key]` and `[validator_token]` with its own validator public key and validator token
+- other config
+- - for data server (the one that runs `-- load`), this should have `[ledger_history]` full
 - modify run parameter `/usr/lib/systemd/system/rippled.service`
 - - data server is run with param `--quorum 1` and `--load`
 - for ubuntu, clear `User` and `Group` from `/usr/lib/systemd/system/rippled.service`
 - run it with `sudo systemctl restart rippled.service`
 - logs
-- - `sudo journalctl` to see if service related issues.
-- - `sudo systemctl status rippled` to see rippled execution issues.
-- - `tail -f /var/log/rippled/debug.log` for rippled log
-- test a command like `/opt/rippled/bin/rippled server_info`
-- - there's wait time after `Watchdog: Launching child 1`. after this is done debug.log will be created
-- - if rippled is running, then executing rippled will result in
-```
-Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/create RocksDB: IO error: lock /var/lib/rippled/db/rocksdb/LOCK: Resource temporarily unavailable'
-```
-- - initially any command will return below. it could be ok debug.log doesn't show any error.
-```
-{
-   "error" : "internal",
-   "error_code" : 69,
-   "error_message" : "Internal error.",
-   "error_what" : "no response from server"
-}
-```
-- loading data takes a lot of time. loading january data takes 3.5 hrs
+- - `sudo journalctl` to see service related issues.
+- - `sudo systemctl status rippled` to see rippled execution issues and some log.
+- - `tail -f /var/log/rippled/debug.log` for rippled runtime log.
+- there's wait time after `Watchdog: Launching child 1`. After this is done debug.log will be created
+- loading data takes a lot of time. Loading January data (~80GB) takes 3.5 hrs on t2.xlarge
 ```
 2018-Feb-09 00:32:36 Application:NFO Loading specified Ledger
 2018-Feb-09 00:32:37 Application:NFO Loading ledger F0F211C05C509156205C73D245F7824995A83BB1C69EDC9953FCE61917B00566 seq:3713121
@@ -55,6 +53,19 @@ Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/cr
 2018-Feb-09 03:48:59 NetworkOPs:NFO STATE->tracking
 2018-Feb-09 03:48:59 OrderBookDB:DBG Advancing from 0 to 3713121
 ```
+- if rippled is running, then executing `/opt/rippled/bin/rippled` will result in
+```
+Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/create RocksDB: IO error: lock /var/lib/rippled/db/rocksdb/LOCK: Resource temporarily unavailable'
+```
+- if data is not fully loaded then any rippled command will return
+```
+{
+   "error" : "internal",
+   "error_code" : 69,
+   "error_message" : "Internal error.",
+   "error_what" : "no response from server"
+}
+```
 - open files problem
 ```
 2018-Feb-08 05:18:29 Application:NFO Loading ledger F0F211C05C509156205C73D245F7824995A83BB1C69EDC9953FCE61917B00566 seq:3713121
@@ -64,15 +75,35 @@ Terminating thread rippled: main: unhandled St13runtime_error 'Unable to open/cr
 2018-Feb-08 05:18:31 Application:ERR The specified ledger could not be loaded.
 2018-Feb-08 05:18:31 Application:DBG Received signal: 2
 ```
+for ubuntu it looks like max open files is 1024 (r1 centos is 8000) https://underyx.me/2015/05/18/raising-the-maximum-number-of-file-descriptors
 
-- - for ubuntu it looks like max open files is 1024 (r1 centos is 8000) https://underyx.me/2015/05/18/raising-the-maximum-number-of-file-descriptors
+but even if this setting is not changed, data can still be loaded successfully
+
+- if data finishes loading then server_info will return
+```
+"build_version" : "0.70.2",
+"complete_ledgers" : "506533-3724995",
+```
+
+##### Deploying other servers
+- wait until data server loads the data.
+```
+"build_version" : "0.70.0",
+"complete_ledgers" : "506533-3713523",
+```
+- run parameter `--quorum 1` and `--net`
+- all servers are started simultaneously
+- from time to time check `rippled peers` to see other peers the server listens to
+- after the server catches up with the most recent ledger, restart it `-- net` and new quorum. Quorum has to be bigger than half the number of validators. If there are 6 validators then `--quorum 4`
+- - restarting a server will cause `Peer:WRN [006] onReadMessage: short read` on the other servers' log
+
 
 **Joel Katz guide**
 - https://forum.ripple.com/viewtopic.php?f=2&t=16207
 
 If you're going to make three validators with a quorum of 2, run the validation_create command three times. Take the three public keys and use that as the UNL on each server. Take the three private keys and configure one of them on each validator.
 
-You then have the challenge of coldstarting your blockchain. The easiest way to do that is to start one validator with "--quorum 1". Let it stabilize, and then add the other two validators also with "--quorum 1". Once all validators are stable, restart them one at a time without any "--quorum" command to return to the configured quorum of 2.
+You then have the challenge of coldstarting your blockchain. The easiest way to do that is to start one validator with "--quorum 1". Let it stabilize, and then add the other two validators also with "--quorum 1". Once all validators are stable, restart them one at a time without any "--quorum" command to return to the configured quorum of 2. **This doesn't work with log showing error: quorum exceeding the number of validators. So quorum has to be set manually**
 
 Note that a 2 of 3 configuration does give you fault tolerance but it does not protect you against even a single malicious/broken validator.
 
@@ -82,37 +113,22 @@ The "validation_public_key" is what all servers should add to their list of vali
 
 The selection of a validation quorum is a bit complex. For large numbers of validators (greater than 15 or so), 80% of the UNL size works well. For smaller numbers, you have to make tradeoffs between fault tolerance and attack resistance. For example, with three validators, two validators give you good fault tolerance but almost no resistance to a malicious validator. Three validators gives you no fault tolerance, but resistance to a malicious validator.
 
-**Deploying other servers**
 
-- wait until data server loads the data.
+#### Errors
+- Loading 0.70 data into 0.80 and later version:
+- in server_info complete ledgers only shows one ledger
 ```
-"build_version" : "0.70.0",
-"complete_ledgers" : "506533-3713523",
-"hostid" : "ip-172-31-58-223",
+"amendment_blocked" : true,
+"build_version" : "0.81.0",
+"complete_ledgers" : "3713121",
 ```
-- run parameter `--quorum 1` and `--net`
-- all servers are started simultaneously
-- it takes around 5 minutes for the log to move from
 ```
-Server:NFO Opened 'port_ws_public' (ip=127.0.0.1:5005, ws)
-2018-Feb-08 04:00:02 NetworkOPs:WRN We are not running on the consensus ledger
-```
-- from time to time check `rippled peers` to see other peers the server listens to
-- restarting a server will cause `Peer:WRN [006] onReadMessage: short read` on the other servers' log
+"amendment_blocked" : true,
+"build_version" : "0.80.2",
+"complete_ledgers" : "3713121",
 
-#### 0.81
-- ledger close is stuck
 ```
-"id" : 1,
-"result" : {
-   "info" : {
-      "amendment_blocked" : true,
-      "build_version" : "0.81.0",
-      "complete_ledgers" : "3713121",
-      "hostid" : "ip-172-31-54-84",
-      "io_latency_ms" : 1,
-```
-compare it with 0.70 which has range and moves backward
+compare it with 0.70 which has range and left side that moves backward to cover old ledgers.
 ```
 "build_version" : "0.70.0",
 "complete_ledgers" : "2796120-3713222",
@@ -158,3 +174,16 @@ Test:
       and compare with other servers to verify if ledgers and synching
       - on "rippled peers" command check for peers and check if ledgers are the same
     3. repeat step 1 and 2 until all servers are tested
+
+#### Specs
+
+- public data server (full history)
+- - Space required currently around 4.5TB (April 2017)
+
+https://www.xrpchat.com/topic/3815-anybody-running-a-rippled-with-at-least-1-year-history/?page=2
+- - 8-16GB RAM
+- - more than 15 validators (Joel Katz note)
+
+#### Rabbit Kicks Club guide
+
+https://rabbitkick.club/rippled_guide/rippled.html
