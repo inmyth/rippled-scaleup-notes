@@ -19,9 +19,9 @@ Current private network needs scaling up. Plan a larger rippled network and figu
 #### Copy-pasting existing data at `/var/lib/rippled` to a new empty server and install rippled.
 
 ##### Starting data server
-- Deploy AMI mbcu-ubuntu16014-rippled-preinstall. This image is plain Ubuntu 16.04 with entire data from Mr.Exchange (2018 Jan).   
-If not then data has to be copied manually. Path is `/var/lib/rippled`.
-One file in the folder `random.seed` needs its permission changed to read first. Use `chmod +r`
+- Deploy AMI mbcu-ubuntu16014-rippled-preinstall. This image is plain Ubuntu 16.04 with entire data from Mr.Exchange (2018 Jan) already placed in `/var/lib/rippled/`.   
+With blank image data has to be copied manually from r.
+One file in the data folder `random.seed` needs its permission changed to read first. Use `chmod +r random.seed`
 - in each validator server
 - - run `./rippled-setup.sh` to install rippled.
 - - run `/opt/ripple/bin/validator-keys create_keys` to generate validator keys
@@ -92,9 +92,9 @@ but even if this setting is not changed, data can still be loaded successfully
 "complete_ledgers" : "506533-3713523",
 ```
 - run parameter `--quorum 1` and `--net`
-- all servers are started simultaneously
+- all servers should be started simultaneously
 - from time to time check `rippled peers` to see other peers the server listens to
-- after the server catches up with the most recent ledger, restart it `-- net` and new quorum. Quorum has to be bigger than half the number of validators. If there are 6 validators then `--quorum 4`
+- after the server catches up with the most recent ledger, restart it with `--net` and new quorum. Quorum has to be higher than half the number of validators. If there are 6 validators then do `--quorum 4`
 - - restarting a server will cause `Peer:WRN [006] onReadMessage: short read` on the other servers' log
 
 
