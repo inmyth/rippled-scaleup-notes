@@ -127,7 +127,11 @@ in server_info complete ledgers only shows one ledger
 "amendment_blocked" : true,
 "build_version" : "0.80.2",
 "complete_ledgers" : "3713121",
-
+```
+```
+"amendment_blocked" : true,
+"build_version" : "0.80.0",
+"complete_ledgers" : "3713121",
 ```
 compare it with 0.70 which has range and left side that moves backward to cover old ledgers.
 ```
