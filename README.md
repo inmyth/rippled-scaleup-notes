@@ -7,9 +7,12 @@
 
 - [x] Test it with existing account to do transaction
 
-- [] Update to latest rippled version.
+- [] Update to latest rippled version during runtime.
 
 - [] Stress test
+
+- [] Run `--load` with Nudb configuration from the start
+
 
 ### Steps (v.070)
 
@@ -117,6 +120,11 @@ Server:NFO Opened 'port_ws_public' (ip=127.0.0.1:5005, ws)
 - copied `[validators]` to `[node_clusters]`
 - check with `rippled peers` and look at `clusters`
 
+**NuDB Config**
+```
+type=NuDB
+path=/var/lib/rippled/db/nudb
+```
 
 #### 0.81
 - ledger close is stuck
