@@ -3,6 +3,8 @@
 ###  Migrate data to another network
 - [] Copy the data to new server install latest rippled, load it, make it connect to other servers.
 
+- [] Validators over 5. Peers should increase
+
 - [] Deploy AMI image from an r snapshot, load it, make it connect to other servers. See Anthony's note
 
 - [x] Test it with existing account to do transaction
@@ -11,7 +13,13 @@
 
 - [] Stress test
 
-- [] Run `--load` with Nudb configuration from the start
+- [x] Run `--load` with Nudb configuration from the start (failed)
+
+- [] Run `--net` with Nudb (data node will still use RocksDB)
+
+- - [] After it syncs delete RocksDB data node
+
+- [] Copy the data from NuDB node and paste it to a new server. Run `--load`
 
 
 ### Steps (v.070)
@@ -125,6 +133,10 @@ Server:NFO Opened 'port_ws_public' (ip=127.0.0.1:5005, ws)
 type=NuDB
 path=/var/lib/rippled/db/nudb
 ```
+
+**Deploying data node with type=nuDb from the beginning**
+- when original data were stored in RocksDB this doesn't work
+
 
 #### 0.81
 - ledger close is stuck
