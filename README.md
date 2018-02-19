@@ -21,6 +21,11 @@
 
 - [] Copy the data from NuDB node and paste it to a new server. Run `--load`
 
+- [] copy the data to GCP instance
+
+- [] make an image of the instance
+
+- [] run test on GCP 
 
 ### Steps (v.070)
 
