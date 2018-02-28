@@ -1,9 +1,30 @@
 ## Objectives
 
 ###  Migrate data to another network
+#### Get the best
+
+Ideally data can be exported, all servers run on nudb and updated to the latest version
+
+- [x] copy data to new server, install rippled on it (data server). configure several validators to connect to it.
+
+- [x] idem but data server runs with --import to NuDB
+-- takes 11 hrs to complete
+
+- [] idem but other servers run with nuDb from the start
+
+- [x] (failed) idem but servers run with latest version from the start
+
+- [] idem but remove server's own signature from cfg
+
+- [] during run time remove data server
+
+- [] during run time update each server
+
+
+#### Minor things
 - [] Copy the data to new server install latest rippled, load it, make it connect to other servers.
 
-- [] Validators over 5. Peers should increase
+- [x] Validators over 5. Peers should increase
 
 - [] Deploy AMI image from an r snapshot, load it, make it connect to other servers. See Anthony's note
 
@@ -15,9 +36,9 @@
 
 - [x] Run `--load` with Nudb configuration from the start (failed)
 
-- [] Run `--net` with Nudb (data node will still use RocksDB)
+- [x] Run `--net` with Nudb (data node will still use RocksDB)
 
-- - [] After it syncs delete RocksDB data node
+- - [x] After it syncs delete RocksDB data node
 
 - [] Copy the data from NuDB node and paste it to a new server. Run `--load`
 
@@ -25,7 +46,7 @@
 
 - [] make an image of the instance
 
-- [] run test on GCP 
+- [] run test on GCP
 
 ### Steps (v.070)
 
@@ -141,6 +162,29 @@ path=/var/lib/rippled/db/nudb
 
 **Deploying data node with type=nuDb from the beginning**
 - when original data were stored in RocksDB this doesn't work
+
+**Importing data --import**
+- use data server
+- configuration is NuDB
+- run --import
+- takes 11 hours
+```
+[import_db]
+type=RocksDB
+path=/var/lib/rippled/db/rocksdb
+
+
+[node_db]
+type=NuDB
+path=/var/lib/rippled/db/nudb
+open_files=2000
+filter_bits=12
+cache_mb=256
+file_size_mb=8
+file_size_mult=2
+online_delete=ledger_history
+advisory_delete=0
+```
 
 
 #### 0.81
